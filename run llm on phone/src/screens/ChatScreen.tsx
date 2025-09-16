@@ -25,6 +25,7 @@ import {
   Video
 } from 'lucide-react-native';
 import { theme } from '../theme/theme';
+import { config, getChatUrl, getSuggestionsUrl } from '../config/config';
 
 interface Message {
   id: string;
@@ -69,7 +70,7 @@ export default function ChatScreen() {
   useEffect(() => {
     const fetchInitialSuggestions = async () => {
       try {
-        const response = await fetch('http://192.168.1.6:5004/suggestions');
+        const response = await fetch(getSuggestionsUrl());
         if (response.ok) {
           const data = await response.json();
           setMessages(prev => prev.map(msg => 
@@ -130,7 +131,7 @@ export default function ChatScreen() {
 
     try {
       // Call Python backend
-      const response = await fetch('http://192.168.1.6:5004/chat', {
+      const response = await fetch(getChatUrl(), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -161,7 +162,7 @@ export default function ChatScreen() {
       console.error('Error calling AI backend:', error);
       
       // Fallback to mock response if backend is unavailable
-      const fallbackResponse = "I'm having trouble connecting to my AI brain right now. Please make sure the Python backend is running on port 5001!";
+      const fallbackResponse = `I'm having trouble connecting to my AI brain right now. Please make sure the Python backend is running on ${config.BACKEND_URL}!`;
       
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),

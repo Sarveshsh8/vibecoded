@@ -67,8 +67,8 @@ def generate_response(user_message, conversation_history=None):
     """Generate AI response to user message using SmolLM-135M with system prompt"""
     
     if model is None or tokenizer is None:
-        # Fallback responses when model is not available
-        return get_fallback_response(user_message)
+        # Return error message when model is not available
+        raise Exception("AI model is not loaded. Please restart the backend.")
     
     try:
         # Simple Q&A system prompt
@@ -127,45 +127,19 @@ A:"""
             
             return ai_response
         else:
-            return get_fallback_response(user_message)
+            raise Exception("Failed to generate AI response. Please try again.")
             
     except Exception as e:
         logger.error(f"Error generating response: {str(e)}")
-        return get_fallback_response(user_message)
+        raise Exception(f"AI response generation failed: {str(e)}")
 
-def get_fallback_response(user_message):
-    """Fallback responses when the model is not available"""
-    
-    message_lower = user_message.lower()
-    
-    # General knowledge responses
-    if any(word in message_lower for word in ['what is', 'who is', 'how does', 'explain', 'define']):
-        return "I'd love to help explain that! However, my AI model isn't currently available. Please try again in a moment, or feel free to ask me about productivity, technology, or general topics."
-    
-    elif any(word in message_lower for word in ['hello', 'hi', 'hey', 'good morning', 'good afternoon']):
-        return "Hello! I'm your AI assistant. I can help answer questions on many topics including technology, science, history, and more. What would you like to know?"
-    
-    elif any(word in message_lower for word in ['help', 'assist', 'support']):
-        return "I'm here to help! I can answer questions on a wide range of topics. Feel free to ask me about anything - from general knowledge to productivity tips!"
-    
-    elif any(word in message_lower for word in ['thank', 'thanks']):
-        return "You're welcome! I'm happy to help. Is there anything else you'd like to know?"
-    
-    elif any(word in message_lower for word in ['task', 'todo', 'schedule', 'productivity']):
-        return "I can help with productivity topics! You can ask me about task management, time management, building habits, or staying focused. What would you like to know?"
-    
-    elif any(word in message_lower for word in ['code', 'programming', 'python', 'javascript', 'technology']):
-        return "I'd be happy to help with programming and technology questions! Ask me about coding concepts, best practices, or technical topics."
-    
-    else:
-        return "That's an interesting question! I'm designed to help with a wide range of topics. Feel free to ask me about science, technology, history, productivity, or anything else you're curious about!"
 
 @app.route('/health', methods=['GET'])
 def health_check():
     """Health check endpoint"""
     return jsonify({
         'status': 'healthy',
-        'model_loaded': generator is not None,
+        'model_loaded': model is not None and tokenizer is not None,
         'message': 'AI Assistant Backend is running!'
     })
 
